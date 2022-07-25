@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1643</width>
+    <height>1014</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>FIT4-5仿真平台</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>441</width>
+      <height>751</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QListWidget{background-color: rgb(247, 247, 247); color:rgb(51,51,51); border: 1px solid  rgb(247, 247, 247);outline:0px;}
+QListWidget::Item{background-color: rgb(247, 247, 247);}
+QListWidget::Item:hover{background-color: rgb(247, 247, 247); }
+QListWidget::item:selected{
+	background-color: rgb(247, 247, 247);
+	color:black; 
+    border: 1px solid  rgb(247, 247, 247);
+}
+QListWidget::item:selected:!active{border: 1px solid  rgb(247, 247, 247); background-color: rgb(247, 247, 247); color:rgb(51,51,51); } </string>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="userhead">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>820</y>
+      <width>110</width>
+      <height>110</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:6px;
+padding:2px 4px;
+border-style: outset;
+border:2px groove gray;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="UserComboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>780</y>
+      <width>115</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:6px;
+padding:2px 4px;
+border-style: outset;
+border:2px groove gray;
+</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>晨峻</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>刘老师</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>港晖</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>兰军</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QTextEdit" name="chat_text">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>780</y>
+      <width>321</width>
+      <height>150</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:6px;
+padding:2px 4px;
+border-style: outset;
+border:2px groove gray;
+background-color: rgb(251, 251, 251);
+border-top-color:rgb(186, 189, 182);
+border:none;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Send_Button">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>890</y>
+      <width>75</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:6px;
+padding:2px 4px;
+border-style: outset;
+border:2px groove gray;
+border:none;
+background-color: rgb(229, 234, 233);
+color: rgb(37, 194, 118);
+</string>
+    </property>
+    <property name="text">
+     <string>发送(↵)</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>16</width>
+      <height>16</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>true</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cleartrackbutton">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>890</y>
+      <width>431</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:6px;
+padding:2px 4px;
+border-style: outset;
+border:2px groove gray;
+background-color: rgb(229, 234, 233);
+color: rgb(37, 194, 118);</string>
+    </property>
+    <property name="text">
+     <string>Clear the Track</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="chat_interface">
+    <property name="geometry">
+     <rect>
+      <x>1370</x>
+      <y>20</y>
+      <width>271</width>
+      <height>931</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="tabChangesFocus">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="map_view_mini">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>20</y>
+      <width>381</width>
+      <height>301</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="map_view_real">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>20</y>
+      <width>511</width>
+      <height>301</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1643</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="action_open_map"/>
+    <addaction name="actionsave_Tag_Location"/>
+    <addaction name="action_exit"/>
+   </widget>
+   <widget class="QMenu" name="menuTool">
+    <property name="title">
+     <string>Tool</string>
+    </property>
+    <addaction name="actionTag_location"/>
+    <addaction name="actionadd_preson"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuTool"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_open_map">
+   <property name="text">
+    <string>&amp;open_map</string>
+   </property>
+  </action>
+  <action name="action_exit">
+   <property name="text">
+    <string>&amp;exit</string>
+   </property>
+  </action>
+  <action name="actionTag_location">
+   <property name="text">
+    <string>tag_location</string>
+   </property>
+  </action>
+  <action name="actionadd_preson">
+   <property name="text">
+    <string>add_preson</string>
+   </property>
+  </action>
+  <action name="actionsave_Tag_Location">
+   <property name="text">
+    <string>save_Tag_Location</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
