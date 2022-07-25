@@ -87,6 +87,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                        2 * int(self.centralwidget.width() / 4),
                                        int(self.centralwidget.width() / 4))
         self.map_view_real.centerOn(self.map_scene_robot_item)
+
         # 聊天框大小及位置设置
         self.listWidget.setGeometry(self.centralwidget.x() + 10,
                                     self.centralwidget.y() + 10,
@@ -423,7 +424,6 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             self.map_scene_room_item_dict[name]["argument"]["label_pos"] = \
                 [int(self.map_scene_room_item_dict[name]['name_label'].x()),
                  int(self.map_scene_room_item_dict[name]['name_label'].y())]
-            print(2)
             room_name_label_pos = self.map_scene_room_item_dict[name]["argument"]["label_pos"]
             d[name]["argument"]["label_pos"] = room_name_label_pos
             d[name]['argument']['name'] = self.map_scene_room_item_dict[name]['argument']["name"]
