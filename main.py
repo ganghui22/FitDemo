@@ -34,8 +34,8 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         # self.water_api = WaterApi("192.168.10.10", 31001)
 
         # 加载地图
-        self._map = QPixmap("data/map/fit4_5/fit4_5.png")
-        self._map_cv2 = cv2.imread("PathPlanningAstar/fit4_5.png")
+        self._map = QPixmap("data/map/fit4_5/fit4_5Dealing.png")
+        self._map_cv2 = cv2.imread("data/map/fit4_5/fit4_5Dealing.png")
         self._map_w, self._map_h = self._map.width(), self._map.height()
 
         # 加载机器人头像
@@ -92,26 +92,6 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                     self.centralwidget.y() + 10,
                                     int(self.centralwidget.width() / 4) - 10,
                                     int(4 * self.centralwidget.height() / 5))
-        # 用户选择框大小及位置设置
-        self.UserComboBox.move(self.listWidget.x(), self.listWidget.y() + self.listWidget.height() + 10)
-        self.UserComboBox.setFixedWidth(int(self.listWidget.width() / 4) - 10)  # 聊天框的五分之一减去10
-        self.UserComboBox.setFixedHeight(self.centralwidget.height() - self.listWidget.height() - \
-                                         self.UserComboBox.width() - 10 - 10 - 10)
-
-        # 用户头像框大小及位置设置
-        self.userhead.setGeometry(self.UserComboBox.x(),
-                                  self.UserComboBox.y() + self.UserComboBox.height() + 10,
-                                  self.UserComboBox.width(),
-                                  self.UserComboBox.width())
-        # 文本框大小及位置设置
-        self.chat_text.setGeometry(self.UserComboBox.x() + self.UserComboBox.width() + 10,
-                                   self.UserComboBox.y(),
-                                   self.listWidget.width() - 10 - self.UserComboBox.width(),
-                                   self.UserComboBox.height() + 10 + self.userhead.height())
-
-        # 发送按钮位置设置
-        self.Send_Button.move(self.chat_text.x() + self.chat_text.width() - self.Send_Button.width() - 5,
-                              self.chat_text.y() + self.chat_text.height() - self.Send_Button.height() - 5)
 
         # 清空按钮的大小及位置设置
         self.cleartrackbutton.move(self.map_view_mini.x(), self.map_view_mini.y() + self.map_view_mini.height() + 10)
@@ -137,7 +117,6 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.map_view_real.setMouseTracking(True)
 
         # 一些Qt组件的属性设置
-        self.userhead.setScaledContents(True)
         self.RobotTargetPoint_pix = None
 
         # 初始化动作扫描服务
@@ -166,7 +145,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.map_view_real.mousePressEvent = self._map_view_real_PressEvent
 
         # save TagLocation槽函数连接
-        self.actionsave_Tag_Location = self.save_map_scene_room_item_dict
+        self.actionsave_Tag_Location.triggered.connect(self.save_map_scene_room_item_dict)
 
     def keyPressEvent(self, a0: QKeyEvent) -> None:
         """
@@ -218,9 +197,13 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         if check:
             self.map_view_real.setDragMode(QGraphicsView.RubberBandDrag)
             self.map_view_real.setCursor(Qt.CrossCursor)
+            for name in self.map_scene_room_item_dict:
+                self.map_scene_room_item_dict[name]['name_label'].setFlag(QGraphicsItem.ItemIsMovable, False)
         else:
             self.map_view_real.setCursor(Qt.ArrowCursor)
             self.map_view_real.setDragMode(QGraphicsView.NoDrag)
+            for name in self.map_scene_room_item_dict:
+                self.map_scene_room_item_dict[name]['name_label'].setFlag(QGraphicsItem.ItemIsMovable,True)
 
     def __dealMessageTime(self, curMsgTime: int):
         """
@@ -438,10 +421,11 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             d[name]['argument'] = {}
             d[name]['argument']['color'] = self.map_scene_room_item_dict[name]["argument"]["color"]
             self.map_scene_room_item_dict[name]["argument"]["label_pos"] = \
-                [int(self.map_scene_room_item_dict['name_label'].x()),
-                 int(self.map_scene_room_item_dict['name_label'].y())]
+                [int(self.map_scene_room_item_dict[name]['name_label'].x()),
+                 int(self.map_scene_room_item_dict[name]['name_label'].y())]
+            print(2)
             room_name_label_pos = self.map_scene_room_item_dict[name]["argument"]["label_pos"]
-            d[name][name]["argument"]["label_pos"] = room_name_label_pos
+            d[name]["argument"]["label_pos"] = room_name_label_pos
             d[name]['argument']['name'] = self.map_scene_room_item_dict[name]['argument']["name"]
             d[name]['argument']['rect'] = self.map_scene_room_item_dict[name]['argument']["rect"]
             d[name]['argument']['room'] = self.map_scene_room_item_dict[name]['argument']["room"]

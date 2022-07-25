@@ -20,7 +20,7 @@
       <x>10</x>
       <y>20</y>
       <width>441</width>
-      <height>751</height>
+      <height>901</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -41,156 +41,12 @@ QListWidget::item:selected:!active{border: 1px solid  rgb(247, 247, 247); backgr
      <enum>Qt::ScrollBarAlwaysOff</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="userhead">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>820</y>
-      <width>110</width>
-      <height>110</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:6px;
-padding:2px 4px;
-border-style: outset;
-border:2px groove gray;</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="UserComboBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>780</y>
-      <width>115</width>
-      <height>35</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:6px;
-padding:2px 4px;
-border-style: outset;
-border:2px groove gray;
-</string>
-    </property>
-    <item>
-     <property name="text">
-      <string>晨峻</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>刘老师</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>港晖</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>兰军</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="QTextEdit" name="chat_text">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>780</y>
-      <width>321</width>
-      <height>150</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:6px;
-padding:2px 4px;
-border-style: outset;
-border:2px groove gray;
-background-color: rgb(251, 251, 251);
-border-top-color:rgb(186, 189, 182);
-border:none;</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Send_Button">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>890</y>
-      <width>75</width>
-      <height>35</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius:6px;
-padding:2px 4px;
-border-style: outset;
-border:2px groove gray;
-border:none;
-background-color: rgb(229, 234, 233);
-color: rgb(37, 194, 118);
-</string>
-    </property>
-    <property name="text">
-     <string>发送(↵)</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>16</width>
-      <height>16</height>
-     </size>
-    </property>
-    <property name="autoDefault">
-     <bool>true</bool>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-    <property name="flat">
-     <bool>false</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="cleartrackbutton">
     <property name="geometry">
      <rect>
       <x>470</x>
       <y>890</y>
-      <width>431</width>
+      <width>1151</width>
       <height>35</height>
      </rect>
     </property>
@@ -214,40 +70,6 @@ color: rgb(37, 194, 118);</string>
      <string>Clear the Track</string>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="chat_interface">
-    <property name="geometry">
-     <rect>
-      <x>1370</x>
-      <y>20</y>
-      <width>271</width>
-      <height>931</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="contextMenuPolicy">
-     <enum>Qt::DefaultContextMenu</enum>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Box</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Sunken</enum>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-    <property name="tabChangesFocus">
-     <bool>false</bool>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="map_view_mini">
     <property name="geometry">
      <rect>
@@ -261,10 +83,10 @@ color: rgb(37, 194, 118);</string>
    <widget class="QGraphicsView" name="map_view_real">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>20</y>
-      <width>511</width>
-      <height>301</height>
+      <x>460</x>
+      <y>320</y>
+      <width>1141</width>
+      <height>551</height>
      </rect>
     </property>
    </widget>

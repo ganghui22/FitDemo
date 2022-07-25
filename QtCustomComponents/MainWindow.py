@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.listWidget = QtWidgets.QListWidget(self.centralwidget)
-        self.listWidget.setGeometry(QtCore.QRect(10, 20, 441, 751))
+        self.listWidget.setGeometry(QtCore.QRect(10, 20, 441, 901))
         self.listWidget.setStyleSheet("QListWidget{background-color: rgb(247, 247, 247); color:rgb(51,51,51); border: 1px solid  rgb(247, 247, 247);outline:0px;}\n"
 "QListWidget::Item{background-color: rgb(247, 247, 247);}\n"
 "QListWidget::Item:hover{background-color: rgb(247, 247, 247); }\n"
@@ -31,72 +31,8 @@ class Ui_MainWindow(object):
         self.listWidget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.listWidget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.listWidget.setObjectName("listWidget")
-        self.userhead = QtWidgets.QLabel(self.centralwidget)
-        self.userhead.setGeometry(QtCore.QRect(10, 820, 110, 110))
-        self.userhead.setAutoFillBackground(False)
-        self.userhead.setStyleSheet("border-radius:6px;\n"
-"padding:2px 4px;\n"
-"border-style: outset;\n"
-"border:2px groove gray;")
-        self.userhead.setText("")
-        self.userhead.setObjectName("userhead")
-        self.UserComboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.UserComboBox.setGeometry(QtCore.QRect(10, 780, 115, 35))
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.UserComboBox.setFont(font)
-        self.UserComboBox.setAutoFillBackground(False)
-        self.UserComboBox.setStyleSheet("border-radius:6px;\n"
-"padding:2px 4px;\n"
-"border-style: outset;\n"
-"border:2px groove gray;\n"
-"")
-        self.UserComboBox.setObjectName("UserComboBox")
-        self.UserComboBox.addItem("")
-        self.UserComboBox.addItem("")
-        self.UserComboBox.addItem("")
-        self.UserComboBox.addItem("")
-        self.chat_text = QtWidgets.QTextEdit(self.centralwidget)
-        self.chat_text.setGeometry(QtCore.QRect(130, 780, 321, 150))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.chat_text.sizePolicy().hasHeightForWidth())
-        self.chat_text.setSizePolicy(sizePolicy)
-        self.chat_text.setStyleSheet("border-radius:6px;\n"
-"padding:2px 4px;\n"
-"border-style: outset;\n"
-"border:2px groove gray;\n"
-"background-color: rgb(251, 251, 251);\n"
-"border-top-color:rgb(186, 189, 182);\n"
-"border:none;")
-        self.chat_text.setObjectName("chat_text")
-        self.Send_Button = QtWidgets.QPushButton(self.centralwidget)
-        self.Send_Button.setGeometry(QtCore.QRect(370, 890, 75, 35))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.Send_Button.sizePolicy().hasHeightForWidth())
-        self.Send_Button.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.Send_Button.setFont(font)
-        self.Send_Button.setAutoFillBackground(False)
-        self.Send_Button.setStyleSheet("border-radius:6px;\n"
-"padding:2px 4px;\n"
-"border-style: outset;\n"
-"border:2px groove gray;\n"
-"border:none;\n"
-"background-color: rgb(229, 234, 233);\n"
-"color: rgb(37, 194, 118);\n"
-"")
-        self.Send_Button.setIconSize(QtCore.QSize(16, 16))
-        self.Send_Button.setAutoDefault(True)
-        self.Send_Button.setDefault(False)
-        self.Send_Button.setFlat(False)
-        self.Send_Button.setObjectName("Send_Button")
         self.cleartrackbutton = QtWidgets.QPushButton(self.centralwidget)
-        self.cleartrackbutton.setGeometry(QtCore.QRect(470, 890, 431, 35))
+        self.cleartrackbutton.setGeometry(QtCore.QRect(470, 890, 1151, 35))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.cleartrackbutton.setFont(font)
@@ -108,25 +44,11 @@ class Ui_MainWindow(object):
 "background-color: rgb(229, 234, 233);\n"
 "color: rgb(37, 194, 118);")
         self.cleartrackbutton.setObjectName("cleartrackbutton")
-        self.chat_interface = QtWidgets.QTextBrowser(self.centralwidget)
-        self.chat_interface.setGeometry(QtCore.QRect(1370, 20, 271, 931))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.chat_interface.sizePolicy().hasHeightForWidth())
-        self.chat_interface.setSizePolicy(sizePolicy)
-        self.chat_interface.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
-        self.chat_interface.setAutoFillBackground(False)
-        self.chat_interface.setFrameShape(QtWidgets.QFrame.Box)
-        self.chat_interface.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.chat_interface.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.chat_interface.setTabChangesFocus(False)
-        self.chat_interface.setObjectName("chat_interface")
         self.map_view_mini = QtWidgets.QGraphicsView(self.centralwidget)
         self.map_view_mini.setGeometry(QtCore.QRect(460, 20, 381, 301))
         self.map_view_mini.setObjectName("map_view_mini")
         self.map_view_real = QtWidgets.QGraphicsView(self.centralwidget)
-        self.map_view_real.setGeometry(QtCore.QRect(850, 20, 511, 301))
+        self.map_view_real.setGeometry(QtCore.QRect(460, 320, 1141, 551))
         self.map_view_real.setObjectName("map_view_real")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -164,11 +86,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "FIT4-5仿真平台"))
-        self.UserComboBox.setItemText(0, _translate("MainWindow", "晨峻"))
-        self.UserComboBox.setItemText(1, _translate("MainWindow", "刘老师"))
-        self.UserComboBox.setItemText(2, _translate("MainWindow", "港晖"))
-        self.UserComboBox.setItemText(3, _translate("MainWindow", "兰军"))
-        self.Send_Button.setText(_translate("MainWindow", "发送(↵)"))
         self.cleartrackbutton.setText(_translate("MainWindow", "Clear the Track"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuTool.setTitle(_translate("MainWindow", "Tool"))
