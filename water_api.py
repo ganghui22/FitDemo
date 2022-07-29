@@ -3,7 +3,7 @@ import socket
 import time
 import math
 import cv2
-import matplotlib.pyplot as plt
+
 import numpy as np
 
 
@@ -169,17 +169,15 @@ class WaterApi:
                 return dct['results']
 
     def robot_status(self) -> dict:
+        receive = {}
         try:
             send_data = "/api/robot_status"
             self.tcp_socket.send(send_data.encode("utf-8"))
-            print('-----------------------------1111----------------------')
             rrr = self.tcp_socket.recv(1024)
-            print('-----------------------------2333--------------------------')
             rrr = rrr.split()
             try:
                 receive = json.loads(rrr[0])
             except json.decoder.JSONDecodeError as e:
-                print(e)
                 error = str(e).split(':', 1)
                 line = error[1].split()[1]  # 行
                 column = error[1].split()[3]  # 列
@@ -193,8 +191,6 @@ class WaterApi:
                 print(error)
         except Exception as e:
             receive = self.robot_status()
-            print(rrr)
-            print(e)
         if 'results' not in receive:
             receive = self.robot_status()
         return receive
@@ -297,7 +293,6 @@ class WaterApi:
         self.tcp_socket.send(send_data.encode("utf-8"))
         receive = self.tcp_socket.recv(1024)
         receive = json.loads(receive)
-        print(receive)
         receive = receive['results']['current_pose']
         return [receive['x'], receive['y'], receive['theta']]
 
@@ -317,131 +312,19 @@ class WaterApi:
         loc_x, loc_y, theta = self.get_current_pose()
         loc_x_pix = int((loc_x - self.origin_x) / self.resolution)
         loc_y_pix = int(self.height - (loc_y - self.origin_y) / self.resolution)
-        return [loc_x_pix, loc_y_pix, theta]
+        return loc_x_pix, loc_y_pix, theta
 
+    def get_pose_real_and_pix_and_isRunning(self):
+        receive = self.robot_status()
+        current_pose = receive['results']['current_pose']
+        loc_x_pix, loc_y_pix = self.real_to_pix(current_pose['x'], current_pose['y'])
+        isRunning = receive['results']['move_status'] == 'running'
+        return [current_pose['x'], current_pose['y'], current_pose['theta']], \
+               [loc_x_pix, loc_y_pix, current_pose['theta']], isRunning
 
-def main():
-    api = WaterApi("192.168.10.10", 31001)
-    api.move_cancel()
-    # api.forward(5)
-    # api.backward(5)
-    # api.move_cancel()
-    import matplotlib.pyplot as plt
-    all_nav_nodes = []
+    def real_to_pix(self, real_x, real_y):
+        return int((real_x - self.origin_x) / self.resolution), \
+               int(self.height - (real_y - self.origin_y) / self.resolution)
 
-    start = [0, 0]
-    grid_size = 0.25
-    for x in range(0, 100, 1):  # 0,14,1
-        for y in range(-10, 30, 1):  # 4,-10,-1
-            receive = api.make_plan(start, [x * grid_size, y * grid_size])
-            if receive['error_message'] == '':
-                all_nav_nodes.append([x * grid_size, y * grid_size])
-
-    print(len(all_nav_nodes))
-    edge_nodes, nav_nodes = edge_node(all_nav_nodes, grid_size)
-    edge_nodes, nav_nodes = edge_node(nav_nodes, grid_size)
-    edge_nodes, _ = edge_node(nav_nodes, grid_size)
-    # print(edge_nodes)
-    plt.figure()
-    x = [iteam[0] for iteam in edge_nodes]
-    y = [iteam[1] for iteam in edge_nodes]
-    plt.scatter(x, y, s=10)
-    plt.show()
-
-    x_median = get_median(x)
-    y_median = get_median(y)
-
-    sample_nodes = []
-    for node in edge_nodes:
-        if node[0] == x_median or node[1] == '/home/xdy/workspace/ros_subscriber.pyy_median':
-            sample_nodes.append(node)
-
-    print(sample_nodes)
-
-    nodes = {}
-    nodes['edge_nodes'] = edge_nodes
-    nodes['nav_nodes'] = nav_nodes
-    nodes['sample_nodes'] = sample_nodes
-
-    import pickle
-    with open(('/home/water/音乐/water-realsense/water备份/vsv_zfb/my_utils/nodes_llj_nodes.pkl'), 'wb') as f:
-        pickle.dump(nodes, f)
-
-    plt.figure()
-    x = [iteam[0] for iteam in nav_nodes]
-    y = [iteam[1] for iteam in nav_nodes]
-    plt.scatter(x, y, s=10)
-
-    x = [iteam[0] for iteam in sample_nodes]
-    y = [iteam[1] for iteam in sample_nodes]
-    plt.scatter(x, y, s=10, c='r')
-    plt.show()
-
-    print("ok")
-
-
-def huatu(curr, origin_x, origin_y, height, width, resolution):
-    api1 = WaterApi("192.168.10.10", 31001)  # 192.168.1.7    192.168.1.21#
-    current_map = curr
-    print(current_map)
-    loc_x_pix1, loc_y_pix1, theta1 = api1.get_pose_pix(origin_x, origin_y, height, width, resolution)
-    print(loc_x_pix1, loc_y_pix1)
-    # cv2.circle(current_map,(loc_y_pix1,loc_y_pix1),1, (0, 255, 0), 8)
-    cv2.arrowedLine(current_map, pt1=(loc_x_pix1, loc_y_pix1), pt2=(int(loc_x_pix1 + 4 * math.cos(theta1)),
-                                                                    int(loc_y_pix1 + 4 * math.sin(theta1))),
-                    color=(0, 0, 255), thickness=2, line_type=cv2.LINE_8,
-                    shift=0, tipLength=0.1)
-    # cv2.arrowedLine(current_map, pt1=(loc_x_pix1, loc_y_pix1), pt2=(int(loc_x_pix1 + 15 * math.cos(theta1)),
-    #                                                                 int(loc_y_pix1 + 15 * math.sin(theta1))),
-    #                 color=(255, 255, 0), thickness=2, line_type=cv2.LINE_8,
-    #                 shift=0, tipLength=0.5)
-    # cv2.imwrite(r'/home/water/音乐/water-realsense/water备份/vsv_zfb/1.png', current_map)
-    api1.set_color((255, 255, 255))
-    cv2.imshow('map', current_map)
-    cv2.waitKey(1)
-    return current_map
-
-
-if __name__ == "__main__":
-    map_dealing('../data/map/fit4_5/fit4_5.png')
-    # map_track_middle('map.png')
-    # main()
-    # api = WaterApi("192.168.10.10", 31001)
-    # print(api.get_map_info())
-
-    # while 1:
-    #
-    #     loc = api.robot_status()
-    #     time.sleep(0.5)
-    #     print(loc)
-    # print(loc)
-    # 192.168.1.7    192.168.1.21#
-    # current_map = cv2.imread("/home/water/音乐/water-realsense/water备份/vsv_zfb/201demo_2.png", cv2.IMREAD_COLOR)
-    # api = WaterApi("192.168.1.13", 31001)
-    # origin_x, origin_y, height, width, resolution = api.get_map_info()
-    # print(origin_x, origin_y, height, width, resolution)
-    # api.move_location(15.0296, 1.05863, math.pi/2)
-
-    # i = 2405
-    # api.move_location(13.13, 2.97416, math.pi)
-    # time.sleep(0.2)
-    # dct = {}
-    # while i <= 2451:
-    #     status = api.robot_status()
-    #     current_pose = status['results']['current_pose']
-    #     time.sleep(0.15)
-    #     dct[str(i)] = [[[9.80316, 5.14088], 487.2390293958824],
-    #                    [[current_pose['x'], current_pose['y']], (current_pose['theta'] / math.pi) * 180],
-    #                    [[43.5627, -3.69066], 299.1266720141208]]
-    #     i = i + 1
-    # package = open("package.json")
-    # dct_json = json.dumps(dct)
-    # print(dct_json)
-    # package.write(dct_json)
-
-    # while 1:
-    #     # current_map = huatu(current_map, origin_x, origin_y, height, width, resolution)
-    #     print(api.robot_status())
-    #     time.sleep(0.1)
-
-    # map_dealing('220demo_2.png')
+    def pix_to_real(self, pix_x, pix_y):
+        return self.resolution * pix_x + self.origin_x, self.origin_y - (pix_y - self.height) * self.resolution

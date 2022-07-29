@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from QtCustomComponents.qnchatmessage import QNChatMessage
 from QtCustomComponents.MainWindow import Ui_MainWindow
+from water_api import WaterApi
 
 
 class DemoWindows(QMainWindow, Ui_MainWindow):
@@ -31,7 +32,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                        self.width(), self.height() - self.menubar.height() - self.statusbar.height())
 
         # 加载water api
-        # self.water_api = WaterApi("192.168.10.10", 31001)
+        self.water_api = WaterApi("81.70.197.166", 7102)
 
         # 加载地图
         self._map = QPixmap("data/map/fit4_5/fit4_5Dealing.png")
@@ -50,8 +51,8 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.map_scene_robot_item = self.map_scene.addPixmap(self._robot)
         # 设置机器人的图层为2
         self.map_scene_robot_item.setZValue(2)
-        # 生成机器人随机位置
-        self.RobotCurrentPoint_pix, self.RobotCurrentPoint = ([1367, 177], [89.2, 7.1])
+        # 获取机器人随机位置
+        self.RobotCurrentPoint, self.RobotCurrentPoint_pix, _= self.water_api.get_pose_real_and_pix_and_isRunning()
         # 设置机器人位置
         self.map_scene_robot_item.setPos(int((self.RobotCurrentPoint_pix[0] - self._robot.width() / 2)),
                                          int(self.RobotCurrentPoint_pix[1] - self._robot.height() / 2))
@@ -60,7 +61,8 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.map_view_real.setScene(self.map_scene)
 
         # map_scene real view 即全局小地图的view设置
-        self.map_view_mini.setScene(self.map_scene)
+        # self.map_view_mini.setScene(self.map_scene)
+        self.map_view_mini.hide()
 
         # 路径画笔定义
         path_pen = QPen()
@@ -75,43 +77,36 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self._map_scene_path_item.setZValue(1)
 
         # 布局设计
-        # 全局小地图大小和位置设置
-        self.map_view_mini.setGeometry(self.centralwidget.x() + int(self.centralwidget.width() / 4),
-                                       self.centralwidget.y() + 10,
-                                       int(self.centralwidget.width() / 4), int(self.centralwidget.width() / 4))
-        self.map_view_mini.scale(0.99 * self.map_view_mini.width() / self._map_w,
-                                 0.99 * self.map_view_mini.height() / self._map_h * (self._map_h / self._map_w))
         # 局部地图的view大小和位置设置,以及聚焦机器人
-        self.map_view_real.setGeometry(self.centralwidget.x() + 2 * int(self.centralwidget.width() / 4),
+        self.map_view_real.setGeometry(self.centralwidget.x() + 4 * int(self.centralwidget.width() / 9) + 10,
                                        self.centralwidget.y() + 10,
-                                       2 * int(self.centralwidget.width() / 4),
-                                       int(self.centralwidget.width() / 4))
+                                       5 * int(self.centralwidget.width() / 9 - 10),
+                                       self.centralwidget.height() - 20)
+        self.map_view_real.scale(0.99*self.map_view_real.width()/ self._map_w,
+                                 0.99*self.map_view_real.height()/self._map_h*(self._map_h/self._map_w))
         self.map_view_real.centerOn(self.map_scene_robot_item)
 
         # 聊天框大小及位置设置
         self.listWidget.setGeometry(self.centralwidget.x() + 10,
                                     self.centralwidget.y() + 10,
-                                    int(self.centralwidget.width() / 4) - 10,
-                                    int(4 * self.centralwidget.height() / 5))
+                                    2*int(self.centralwidget.width() / 9) - 10,
+                                    3*int(self.centralwidget.height() / 4)-20)
 
         # 清空按钮的大小及位置设置
         self.cleartrackbutton.move(self.map_view_mini.x(), self.map_view_mini.y() + self.map_view_mini.height() + 10)
         self.cleartrackbutton.setFixedWidth(self.map_view_mini.width() + self.map_view_real.width())
-
+        self.cleartrackbutton.hide()
         # 加载地点列表
         with open('data/Location_list.json', 'r', encoding='utf-8') as f:
             self._location_list: dict = json.load(f)
 
         # 一些槽函数的连接
-        # self.Send_Button.clicked.connect(self.sendButtonFunction)
-        # self.UserComboBox.currentIndexChanged.connect(self.__userChanged)
         self.cleartrackbutton.clicked.connect(self.__clearTrackFunction)
 
         # 向statusbar添加map_view_real的信息打印
         self.map_view_real_status = QLabel()
         self.map_view_real_status.setMinimumWidth(150)
         self.statusbar.addWidget(self.map_view_real_status)
-
         # 重写map_view_real 的mouseMoveEvent函数
         self.map_view_real.mouseMoveEvent = self._map_view_real_mouseMoveEvent
         # 打开map_view_real 的鼠标跟踪功能
@@ -123,7 +118,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         # 初始化动作扫描服务
         self.__moveTimer = QTimer(self)
         self.__moveTimer.timeout.connect(self.__moveScanf)
-        self.__moveSpeed = 10
+        self.__moveSpeed = 100
         self.__waitForPathPlanning = False
         self.__moveTimer.start(self.__moveSpeed)
 
@@ -178,9 +173,12 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         """
         view_pos = event.pos()
         scene_pos = self.map_view_real.mapToScene(view_pos)
-        self.window().map_view_real_status.setText("<font color='red'>X</font>:<font color='blue'>{}</font>, "
-                                                   "<font color='red'>Y</font>:<font color='blue'>{}</font>"
-                                                   .format(scene_pos.x(), scene_pos.y()))
+        real_x, real_y = self.water_api.pix_to_real(scene_pos.x(),scene_pos.y())
+        self.window().map_view_real_status.setText("<font color='red'>P_X</font>:<font color='blue'>{:.0f}</font>, "
+                                                   "<font color='red'>P_Y</font>:<font color='blue'>{:.0f}</font>   "
+                                                   "<font color='green'>R_X</font>:<font color='blue'>{:.2f}</font>,"
+                                                   "<font color='green'>R_Y</font>:<font color='blue'>{:.2f}</font>"
+                                                   .format(scene_pos.x(), scene_pos.y(), real_x, real_y))
         return QGraphicsView.mouseMoveEvent(self.map_view_real, event)
 
     def _map_view_real_PressEvent(self, e: QMouseEvent):
@@ -263,14 +261,17 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         动作序列的扫描函数
 
         """
-        # self.RobotCurrentPoint_pix = self.__currentMovePath.pop(0)  # 读出路径序列第一个元素
-        # self.RobotCurrentPoint_pix = [self.RobotCurrentPoint_pix[0], self.RobotCurrentPoint_pix[1]]  # 更新当前位置
-        # self._map_scene_path.lineTo(self.RobotCurrentPoint_pix[0], self.RobotCurrentPoint_pix[1])
-        # self._map_scene_path_item.setPath(self._map_scene_path)
-        # self.map_scene_robot_item.setPos(self.RobotCurrentPoint_pix[0] - int(self._robot.width() / 2),
-        #                                  self.RobotCurrentPoint_pix[1] - int(self._robot.height() / 2))
-        # self.map_view_real.centerOn(self.map_scene_robot_item)
-        pass
+        self.RobotCurrentPoint, self.RobotCurrentPoint_pix, isRunning = self.water_api.get_pose_real_and_pix_and_isRunning()
+
+        self.map_scene_robot_item.setPos(int((self.RobotCurrentPoint_pix[0] - self._robot.width() / 2)),
+                                         int(self.RobotCurrentPoint_pix[1] - self._robot.height() / 2))
+        if isRunning:
+            self._map_scene_path.lineTo(self.RobotCurrentPoint_pix[0], self.RobotCurrentPoint_pix[1])
+            self._map_scene_path_item.setPath(self._map_scene_path)
+        else:
+            self._map_scene_path.clear()
+            self._map_scene_path.moveTo(self.RobotCurrentPoint_pix[0], self.RobotCurrentPoint_pix[1])
+            self._map_scene_path_item.setPath(self._map_scene_path)
 
     def action_exit_fun(self):
         """
