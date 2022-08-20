@@ -8,6 +8,7 @@ import json
 import os
 import pickle
 import numpy as np
+import colorsys
 from PyQt5.QtCore import QTimer, QSize, QDateTime, Qt, QPoint
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -30,13 +31,15 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.setGeometry(self.centralwidget.x() + 0, self.centralwidget.height() + 0, desktop_w, desktop_h)
         self.centralwidget.setGeometry(0, 0,
                                        self.width(), self.height() - self.menubar.height() - self.statusbar.height())
-
+        self.water_api_isConnect = True
         # 加载water api
-        self.water_api = WaterApi("81.70.197.166", 7102)
-
+        try:
+            self.water_api = WaterApi("81.70.197.166", 7102)
+        except:
+            self.water_api_isConnect = False
         # 加载地图
-        self._map = QPixmap("data/map/fit4_5/fit4_5Dealing.png")
-        self._map_cv2 = cv2.imread("data/map/fit4_5/fit4_5Dealing.png")
+        self._map = QPixmap("data/map/fit4_5/mapDealing.png")
+        self._map_cv2 = cv2.imread("data/map/fit4_5/mapDealing.png")
         self._map_w, self._map_h = self._map.width(), self._map.height()
 
         # 加载机器人头像
@@ -52,7 +55,11 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         # 设置机器人的图层为2
         self.map_scene_robot_item.setZValue(2)
         # 获取机器人随机位置
-        self.RobotCurrentPoint, self.RobotCurrentPoint_pix, _= self.water_api.get_pose_real_and_pix_and_isRunning()
+        if self.water_api_isConnect:
+            self.RobotCurrentPoint, self.RobotCurrentPoint_pix, _ = self.water_api.get_pose_real_and_pix_and_isRunning()
+        else:
+            self.RobotCurrentPoint, self.RobotCurrentPoint_pix = [0, 0], [0, 0]
+            self.map_scene_robot_item.setVisible(False)
         # 设置机器人位置
         self.map_scene_robot_item.setPos(int((self.RobotCurrentPoint_pix[0] - self._robot.width() / 2)),
                                          int(self.RobotCurrentPoint_pix[1] - self._robot.height() / 2))
@@ -82,23 +89,27 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                        self.centralwidget.y() + 10,
                                        5 * int(self.centralwidget.width() / 9 - 10),
                                        self.centralwidget.height() - 20)
-        self.map_view_real.scale(0.99*self.map_view_real.width()/ self._map_w,
-                                 0.99*self.map_view_real.height()/self._map_h*(self._map_h/self._map_w))
+        self.map_view_real_scale_w = 0.99 * self.map_view_real.width() / self._map_w
+        self.map_view_real_scale_h = 0.99 * self.map_view_real.height() / self._map_h * (self._map_h / self._map_w)
+        self.map_view_real.scale(self.map_view_real_scale_w,
+                                 self.map_view_real_scale_h)
         self.map_view_real.centerOn(self.map_scene_robot_item)
 
         # 聊天框大小及位置设置
         self.listWidget.setGeometry(self.centralwidget.x() + 10,
                                     self.centralwidget.y() + 10,
-                                    2*int(self.centralwidget.width() / 9) - 10,
-                                    3*int(self.centralwidget.height() / 4)-20)
+                                    2 * int(self.centralwidget.width() / 9) - 10,
+                                    3 * int(self.centralwidget.height() / 4) - 20)
 
         # 清空按钮的大小及位置设置
         self.cleartrackbutton.move(self.map_view_mini.x(), self.map_view_mini.y() + self.map_view_mini.height() + 10)
         self.cleartrackbutton.setFixedWidth(self.map_view_mini.width() + self.map_view_real.width())
         self.cleartrackbutton.hide()
+
         # 加载地点列表
         with open('data/Location_list.json', 'r', encoding='utf-8') as f:
             self._location_list: dict = json.load(f)
+        self.loc_color_list = []
 
         # 一些槽函数的连接
         self.cleartrackbutton.clicked.connect(self.__clearTrackFunction)
@@ -116,11 +127,12 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.RobotTargetPoint_pix = None
 
         # 初始化动作扫描服务
-        self.__moveTimer = QTimer(self)
-        self.__moveTimer.timeout.connect(self.__moveScanf)
-        self.__moveSpeed = 100
-        self.__waitForPathPlanning = False
-        self.__moveTimer.start(self.__moveSpeed)
+        if self.water_api_isConnect:
+            self.__moveTimer = QTimer(self)
+            self.__moveTimer.timeout.connect(self.__moveScanf)
+            self.__moveSpeed = 100
+            self.__waitForPathPlanning = False
+            self.__moveTimer.start(self.__moveSpeed)
 
         # 画框标志位
         self.isDragRect = False
@@ -142,6 +154,35 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
 
         # save TagLocation槽函数连接
         self.actionsave_Tag_Location.triggered.connect(self.save_map_scene_room_item_dict)
+        self.actionsave_mapView.triggered.connect(self.__save_map_view)
+        self.actionshowRoomLabel.setCheckable(True)
+        self.actionshowRoomLabel.setChecked(True)
+        self.actionshowRoomLabel.triggered.connect(self.__showRoomLabel_view)
+
+    def __showRoomLabel_view(self, check: bool):
+        """
+        显示房间Label
+        :param check:
+        :return:
+        """
+        if check:
+            for name in self.map_scene_room_item_dict:
+                self.map_scene_room_item_dict[name]['name_label'].setVisible(True)
+        else:
+            for name in self.map_scene_room_item_dict:
+                self.map_scene_room_item_dict[name]['name_label'].setVisible(False)
+
+    def __save_map_view(self):
+        geometry = self.map_view_real.geometry()
+        path = QFileDialog.getSaveFileName(self.window(), '选择保存的路径', filter='png(*.png)')
+        self.map_view_real.setGeometry(0, 0, int(self.map_scene.width()), int(self.map_scene.height()))
+        self.map_view_real.scale(1 / self.map_view_real_scale_w, 1 / self.map_view_real_scale_h)
+        map_view = self.map_view_real.grab()
+        self.map_view_real.setGeometry(geometry)
+        self.map_view_real.scale(0.99 * self.map_view_real.width() / self._map_w,
+                                 0.99 * self.map_view_real.height() / self._map_h * (self._map_h / self._map_w))
+
+        map_view.save(path[0])
 
     def keyPressEvent(self, a0: QKeyEvent) -> None:
         """
@@ -173,7 +214,9 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         """
         view_pos = event.pos()
         scene_pos = self.map_view_real.mapToScene(view_pos)
-        real_x, real_y = self.water_api.pix_to_real(scene_pos.x(),scene_pos.y())
+
+        real_x, real_y = self.water_api.pix_to_real(scene_pos.x(), scene_pos.y()) if self.water_api_isConnect else 0, 0
+
         self.window().map_view_real_status.setText("<font color='red'>P_X</font>:<font color='blue'>{:.0f}</font>, "
                                                    "<font color='red'>P_Y</font>:<font color='blue'>{:.0f}</font>   "
                                                    "<font color='green'>R_X</font>:<font color='blue'>{:.2f}</font>,"
@@ -202,7 +245,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             self.map_view_real.setCursor(Qt.ArrowCursor)
             self.map_view_real.setDragMode(QGraphicsView.NoDrag)
             for name in self.map_scene_room_item_dict:
-                self.map_scene_room_item_dict[name]['name_label'].setFlag(QGraphicsItem.ItemIsMovable,True)
+                self.map_scene_room_item_dict[name]['name_label'].setFlag(QGraphicsItem.ItemIsMovable, True)
 
     def __dealMessageTime(self, curMsgTime: int):
         """
@@ -289,12 +332,14 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         if os.path.exists("data/fit4_5Dealing.pkl"):
             with open("data/fit4_5Dealing.pkl", 'rb') as f:
                 d = pickle.load(f)
+            self.loc_color_list = d.pop('color_list')
             for r in d:
                 # 加载room信息
                 rect = d[r]['argument']['rect']
                 room = d[r]['argument']['room']
                 room_color = d[r]['argument']['color']
-                color = (255 - room_color).tolist() + [200]
+                # color = (255 - room_color).tolist() + [200]
+                color = [0, 0, 0, 255]
                 room_name_label_pos = d[r]['argument']['label_pos']
 
                 name = d[r]['argument']['name']
@@ -308,7 +353,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                          QGraphicsItem.ItemIsMovable |
                                          QGraphicsItem.ItemIsFocusable)
                 room_name_label.setZValue(4)
-
+                room[:, :, 3] = np.where(room[:, :, 3] != 0, 60, room[:, :, 3])
                 Q_room_Image = QImage(room.data, room.shape[1], room.shape[0], room.shape[1] * 4,
                                       QImage.Format_RGBA8888)
                 Q_room = QPixmap().fromImage(Q_room_Image)
@@ -325,15 +370,15 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                 self.map_scene_room_item_dict[r] = d[r]
                 self.map_scene_room_item_dict[r]['item'] = map_room_item
                 self.map_scene_room_item_dict[r]['name_label'] = room_name_label
-            items = []
-            for room_name in self._location_list:
-                if room_name not in self.map_scene_room_item_dict:
-                    items.append(room_name)
-            if items:
-                pass
-            else:
+            is_over = True
+            for key in self._location_list:
+                if key not in d:
+                    is_over = False
+            if is_over:
                 self.actionTag_location.setCheckable(False)
                 self.actionTag_location.setVisible(False)
+        else:
+            self.loc_color_list = self._get_colors(len(self._location_list))
 
     def _map_view_real_ReleaseEvent(self, e: QMouseEvent):
         """
@@ -360,13 +405,13 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                                  int(r[0].x()):int(r[2].x())], dtype='uint8')
             room_mask = np.where((room_mask == 1) + (room_mask == 3),
                                  125, 0).reshape(room_mask.shape[0], room_mask.shape[1], 1)
-            room_color = np.random.randint(0, 255, 3)
+            room_color = np.array(self.loc_color_list.pop()) * 255
             room = room_color * np.ones((room_mask.shape[0], room_mask.shape[1], 1), np.uint8)
             room = np.concatenate((room, room_mask), axis=2).astype(np.uint8)
+            room[:, :, 3] = np.where(room[:, :, 3] != 0, 60, room[:, :, 3])
             Q_room_Image = QImage(room.data, room.shape[1], room.shape[0], room.shape[1] * 4,
                                   QImage.Format_RGBA8888)
             Q_room = QPixmap().fromImage(Q_room_Image)
-
             # 记录当前房间item
             map_room_item: QGraphicsPixmapItem = self.map_scene.addPixmap(Q_room)
             map_room_item.setPos(r[0])
@@ -375,7 +420,6 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             map_room_item.setFlags(QGraphicsItem.ItemIsSelectable |
                                    QGraphicsItem.ItemIsFocusable |
                                    QGraphicsItem.ItemClipsToShape)
-
             items = []
             for room_name in self._location_list:
                 if room_name not in self.map_scene_room_item_dict:
@@ -385,6 +429,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                 self.map_scene_room_item_dict[name] = {}
                 room_name_label: QGraphicsTextItem = self.map_scene.addText(name)
                 color = (255 - room_color).tolist() + [200]
+                color = [0, 0, 0, 255]
                 room_name_label.setDefaultTextColor(QColor(color[0], color[1], color[2], color[3]))
                 font = QFont("Times", 28)
                 room_name_label.setFont(font)
@@ -393,6 +438,8 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                 room_name_label.setZValue(4)
                 room_name_label_pos = [int(rect[0] + rect[2] / 2), int(rect[1] + rect[3] / 2 - 36)]
                 room_name_label.setPos(room_name_label_pos[0], room_name_label_pos[1])
+                if not self.actionshowRoomLabel.isChecked():
+                    room_name_label.setVisible(False)
                 map_room_item.setData(0, name)  # 自定义map_room_item的值
                 self.map_scene_room_item_dict[name]["item"] = map_room_item
                 self.map_scene_room_item_dict[name]["name_label"] = room_name_label
@@ -409,6 +456,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
                     self.actionTag_location.setDisabled(True)
             else:
                 self.map_scene.removeItem(map_room_item)
+                self.loc_color_list.append(room_color)
             # drag模式选择Flag
             self.dragRectPressFlag = False
         return QGraphicsView.mouseReleaseEvent(self.map_view_real, e)
@@ -430,8 +478,21 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             d[name]['argument']['name'] = self.map_scene_room_item_dict[name]['argument']["name"]
             d[name]['argument']['rect'] = self.map_scene_room_item_dict[name]['argument']["rect"]
             d[name]['argument']['room'] = self.map_scene_room_item_dict[name]['argument']["room"]
+        d['color_list'] = self.loc_color_list
         with open("data/fit4_5Dealing.pkl", 'wb') as f:
             pickle.dump(d, f)
+
+    @staticmethod
+    def _get_colors(num_colors):
+        colors = []
+
+        for i in np.arange(0., 360., 360. / num_colors):
+            hue = i / 360.
+            lightness = (50 + np.random.rand() * 10) / 100.
+            saturation = (90 + np.random.rand() * 10) / 100.
+            colors.append(colorsys.hls_to_rgb(hue, lightness, saturation))
+
+        return colors
 
 
 if __name__ == '__main__':

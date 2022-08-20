@@ -255,6 +255,11 @@ class WaterApi:
         return receive
 
     def get_path(self):
+        """
+        返回当前路径
+
+        :return:
+        """
         receive = self.tcp_socket.recv(1024)
         if len(receive): print(str(receive, encoding='utf-8'))
         send_data = "/api/get_planned_path"
@@ -266,29 +271,22 @@ class WaterApi:
         return path
 
     def set_color(self, rgb_value):
+        """
+        设置灯条RGB值, 一般不会立即生效，回去充电时会自动生效
+
+        :param rgb_value: (R, G, B)
+        :return:
+        """
         # RGB_VALUE --> (R,G,B)
         send_data = "/api/LED/set_color?r={}&g={}&b={}".format(rgb_value[0], rgb_value[1], rgb_value[2])
         self.tcp_socket.send(send_data.encode("utf-8"))
 
-    def read_map(self):
-        send_data = "/api/map/get_current_map"
-        self.tcp_socket.send(send_data.encode("utf-8"))
-        receive = self.tcp_socket.recv(1024)
-        receive = json.loads(receive)
-        map_name = receive['results']['map_name']
-        floor = receive['results']['floor']
-        print(map_name)
-        print(floor)
-        map_name = map_name + '_' + str(floor) + ".png"
-        print("Current map's name:", map_name)
-        try:
-            current_map = cv2.imread("/home/water/音乐/water-realsense/water备份/vsv_zfb/201demo_2.png", cv2.IMREAD_COLOR)
-        except IOError:
-            print("The current map was not found locally")
-        else:
-            return current_map
-
     def get_current_pose(self):
+        """
+        返回当前世界坐标
+
+        :return: [世界坐标x, 世界坐标y, 角度theta]
+        """
         send_data = "/api/robot_status"
         self.tcp_socket.send(send_data.encode("utf-8"))
         receive = self.tcp_socket.recv(1024)
@@ -297,6 +295,10 @@ class WaterApi:
         return [receive['x'], receive['y'], receive['theta']]
 
     def get_map_info(self):
+        """
+        得到地图的相关信息
+        :return: [地图左下角世界坐标x, 地图左下角世界坐标y, 像素地图高度, 像素地图宽度, 分辨率]
+        """
         send_data = "/api/map/get_current_map"
         self.tcp_socket.send(send_data.encode("utf-8"))
         receive = self.tcp_socket.recv(1024)
@@ -306,8 +308,9 @@ class WaterApi:
 
     def get_pose_pix(self):
         """
-        函数名:get_pose_pix()
+        返回像素坐标
 
+        :return: [像素坐标x, 像素坐标y, 角度theta]
         """
         loc_x, loc_y, theta = self.get_current_pose()
         loc_x_pix = int((loc_x - self.origin_x) / self.resolution)
@@ -315,6 +318,11 @@ class WaterApi:
         return loc_x_pix, loc_y_pix, theta
 
     def get_pose_real_and_pix_and_isRunning(self):
+        """
+        返回世界坐标和像素坐标以及isRunning的状态
+
+        :return: ([世界坐标x, 世界坐标y, 当前角度theta], [像素坐标x, 像素坐标y, 当前角度theta], isRunning)
+        """
         receive = self.robot_status()
         current_pose = receive['results']['current_pose']
         loc_x_pix, loc_y_pix = self.real_to_pix(current_pose['x'], current_pose['y'])
@@ -323,8 +331,22 @@ class WaterApi:
                [loc_x_pix, loc_y_pix, current_pose['theta']], isRunning
 
     def real_to_pix(self, real_x, real_y):
+        """
+        世界坐标转换成像素坐标
+
+        :param real_x: 世界坐标x
+        :param real_y: 世界坐标y
+        :return: (像素坐标x, 像素坐标y)
+        """
         return int((real_x - self.origin_x) / self.resolution), \
                int(self.height - (real_y - self.origin_y) / self.resolution)
 
     def pix_to_real(self, pix_x, pix_y):
+        """
+        像素坐标转换成世界坐标
+
+        :param pix_x: 像素坐标x
+        :param pix_y: 像素坐标y
+        :return: (世界坐标x, 世界坐标y)
+        """
         return self.resolution * pix_x + self.origin_x, self.origin_y - (pix_y - self.height) * self.resolution
