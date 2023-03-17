@@ -92,7 +92,8 @@ class QNChatMessage(QWidget):
         kuangTMP = 20
         textSpaceRect = 10
         nameHei = 30
-        width = 441
+        print(self.width())
+        width = self.width()
         self.m_kuangWidth = width - kuangTMP - 2 * (iconWH + iconSpaceW + iconRectW)
         self.m_textWidth = self.m_kuangWidth - 2 * textSpaceRect
         self.m_spaceWid = width - self.m_textWidth

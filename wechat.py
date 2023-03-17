@@ -63,7 +63,7 @@ class WechatMessage(object):
 
 
 class WechatServer:
-    def __init__(self, wx_id: str, func_on_msgs, func_on_event, url: str = 'http://81.70.197.166:8898', 
+    def __init__(self, wx_id: str, func_on_msgs, func_on_event, url: str = 'http://81.70.197.166:8898',
                 InstructionPrediction_InQueue:Queue = None,
                 InstructionPrediction_OutQueue:Queue = None,                
                 ):
@@ -117,7 +117,7 @@ class WechatServer:
                         else:
                             print('send message to:{},content:{}'.format(message['ToUserName'], message['Content']))
 
-        @self.sio.on('OnWeChatEvents')
+        @self.sio.on('OnWeChatEve nts')
         def OnWeChatEvents(message):
             """
             事件触发

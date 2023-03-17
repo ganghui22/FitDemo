@@ -9,7 +9,7 @@ import os
 import pickle
 import numpy as np
 import colorsys
-from PyQt5.QtCore import QTimer, QSize, QDateTime, Qt, QPoint
+from PyQt5.QtCore import QTimer, QSize, QDateTime, Qt, QPoint, QRect
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from QtCustomComponents.qnchatmessage import QNChatMessage
@@ -68,7 +68,7 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.map_view_real.setScene(self.map_scene)
 
         # map_scene real view 即全局小地图的view设置
-        # self.map_view_mini.setScene(self.map_scene)
+        self.map_view_mini.setScene(self.map_scene)
         self.map_view_mini.hide()
 
         # 路径画笔定义
@@ -105,6 +105,45 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         self.cleartrackbutton.move(self.map_view_mini.x(), self.map_view_mini.y() + self.map_view_mini.height() + 10)
         self.cleartrackbutton.setFixedWidth(self.map_view_mini.width() + self.map_view_real.width())
         self.cleartrackbutton.hide()
+
+        # 对话框嵌入
+        self.send_text = QTextEdit(self.window())
+        self.send_text.setGeometry(self.listWidget.x(), self.y() + self.listWidget.height() + 10,
+                                   2 * int(self.centralwidget.width() / 9) - 10 - 110 - 10 - 10,
+                                   1 * int(self.centralwidget.height() / 4) - 10)
+        self.send_text.setStyleSheet("border-radius:6px;\n"
+                                     "padding:2px 4px;\n"
+                                     "border-style: outset;\n"
+                                     "border:2px groove gray;\n"
+                                     "background-color: rgb(251, 251, 251);\n"
+                                     "border-top-color:rgb(186, 189, 182);\n"
+                                     "border:none;")
+        self.send_button = QPushButton(self.window())
+        self.send_button.setText("发送")
+        self.send_button.setGeometry(self.send_text.x() + self.send_text.width() + 10,
+                                     self.send_text.y() + self.send_text.height() - 50,
+                                     110,
+                                     50)
+
+        self.send_button.setStyleSheet("border-radius:6px;\n"
+                                       "padding:2px 4px;\n"
+                                       "border-style: outset;\n"
+                                       "border:2px groove gray;\n"
+                                       "border:none;\n"
+                                       "background-color: rgb(229, 234, 233);\n"
+                                       "color: rgb(37, 194, 118);")
+        # 头像框嵌入
+        self.userhead = QLabel(self.window())
+        self.userhead.setGeometry(self.listWidget.x() + self.send_text.width() + 10,
+                                  self.y() + self.listWidget.height() + 10,
+                                  110,
+                                  110)
+        self.userhead.setAutoFillBackground(False)
+        self.userhead.setStyleSheet("border-radius:6px;\n"
+                                    "padding:2px 4px;\n"
+                                    "border-style: outset;\n"
+                                    "border:2px groove gray;")
+        self.userhead.setText("")
 
         # 加载地点列表
         with open('data/Location_list.json', 'r', encoding='utf-8') as f:
@@ -171,6 +210,28 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         else:
             for name in self.map_scene_room_item_dict:
                 self.map_scene_room_item_dict[name]['name_label'].setVisible(False)
+
+    def __dealMessageTime(self, curMsgTime: int):
+        """
+        处理对话时时间显示函数
+        """
+        isShowTime = False
+        if self.listWidget.count() > 0:
+            lastItem = self.listWidget.item(self.listWidget.count() - 1)
+            messageW = self.listWidget.itemWidget(lastItem)
+            lastTime = messageW.m_time
+            curTime = curMsgTime
+            isShowTime = ((curTime - lastTime) > 60)  # 两个消息相差一分钟
+        else:
+            isShowTime = True
+        if isShowTime:
+            messageTime = QNChatMessage(self.listWidget.parentWidget())
+            itemTime = QListWidgetItem(self.listWidget)
+            size = QSize(self.width(), 40)
+            messageTime.resize(size)
+            itemTime.setSizeHint(size)
+            messageTime.setText(str(curMsgTime), curMsgTime, "", size, QNChatMessage.User_Type.User_Time)
+            self.listWidget.setItemWidget(itemTime, messageTime)
 
     def __save_map_view(self):
         geometry = self.map_view_real.geometry()
@@ -246,6 +307,17 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
             self.map_view_real.setDragMode(QGraphicsView.NoDrag)
             for name in self.map_scene_room_item_dict:
                 self.map_scene_room_item_dict[name]['name_label'].setFlag(QGraphicsItem.ItemIsMovable, True)
+
+    def __dealMessageShow(self, messageW: QNChatMessage, item: QListWidgetItem,
+                          text: str, name: str, time: int, usertype: QNChatMessage.User_Type):
+        """
+        处理消息气泡显示效果的函数
+        """
+        messageW.setFixedWidth(self.width())
+        size = messageW.fontRect(text, name)
+        item.setSizeHint(size)
+        messageW.setText(text, time, name, size, usertype)
+        self.listWidget.setItemWidget(item, messageW)
 
     def __dealMessageTime(self, curMsgTime: int):
         """
@@ -482,6 +554,40 @@ class DemoWindows(QMainWindow, Ui_MainWindow):
         with open("data/fit4_5Dealing.pkl", 'wb') as f:
             pickle.dump(d, f)
 
+    def sendButtonFunction(self):
+        """
+        用户消息发送按钮点击事件
+        """
+
+        sendText = self.chat_text.toPlainText()
+        self.chat_text.setText("")
+        if sendText != '':
+            self.UserTalk(sendText)
+            if self.CurrentUser['name'] != "Robot":
+                t = self.CurrentUser['name'] + ":" + sendText
+                self.dealMessage(t)
+
+    def dealMessage(self, sentence: str):
+        """
+        消息处理函数，主要对消息进行一些简单的处理
+        """
+        if sentence == "":
+            return
+        else:
+            speak_person = sentence.split(":")[0]
+            speak_person = self._Person[speak_person]
+            self.__userChanged(None, speak_person)
+            t = sentence.split(":")[1]
+            self.UserTalk(t)
+            # if '@ Robot' not in sentence:
+            #     # 提取时间、地点、人物三元组并更新动态时空图谱
+            #     self._TimeSpaceGraph_InQueue.put([True, sentence])
+            # else:
+            #     # 指令处理
+            #     sentence = sentence[sentence.index('@ Robot') + 7:]
+            #     self.dealInstruction(sentence)
+
+
     @staticmethod
     def _get_colors(num_colors):
         colors = []
@@ -499,4 +605,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = DemoWindows()
     window.showFullScreen()
+    window.RobotTalk("你好")
     sys.exit(app.exec_())

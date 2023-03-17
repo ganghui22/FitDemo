@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.listWidget = QtWidgets.QListWidget(self.centralwidget)
-        self.listWidget.setGeometry(QtCore.QRect(10, 20, 441, 901))
+        self.listWidget.setGeometry(QtCore.QRect(10, 20, 441, 701))
         self.listWidget.setStyleSheet("QListWidget{background-color: rgb(247, 247, 247); color:rgb(51,51,51); border: 1px solid  rgb(247, 247, 247);outline:0px;}\n"
 "QListWidget::Item{background-color: rgb(247, 247, 247);}\n"
 "QListWidget::Item:hover{background-color: rgb(247, 247, 247); }\n"
